@@ -1,12 +1,10 @@
 import React from 'react';
 import './App.css';
+import { GalleryPage } from './pages/GalleryPage';
 
 function App() {
   return (
-    <div className="App">
-      <h1 className="main-title">Game Gallery</h1>
-      <p className="loading-message">Project is loading...</p>
-    </div>
+    <GalleryPage />
   );
 }
 
