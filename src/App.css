@@ -70,6 +70,7 @@
   color: #aaa;
   font-size: 0.9rem;
 }
+
 /* --- Pagination --- */
 .pagination-container {
   display: flex;
@@ -192,4 +193,38 @@
 }
 .modal-description br {
   display: none; /* Hide <br> tags to prevent double spacing */
+}
+
+/* --- Store Button List --- */
+.modal-stores-container {
+  margin-top: 20px;
+}
+
+.modal-stores-container h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #EAEAEA;
+}
+
+/* This makes the buttons wrap nicely */
+.modal-stores-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px; /* Spacing between buttons */
+}
+
+.modal-play-button {
+  display: inline-block;
+  background-color: #EAEAEA;
+  color: #151515;
+  padding: 12px 20px;
+  text-decoration: none;
+  font-weight: bold;
+  border-radius: 5px;
+  transition: background-color 0.2s;
+  margin-top: 0; /* Reset margin for list view */
+}
+
+.modal-play-button:hover {
+  background-color: #CCCCCC;
 }

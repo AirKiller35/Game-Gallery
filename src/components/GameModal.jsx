@@ -1,8 +1,17 @@
 import React, { useState, useEffect } from 'react';
 
+const ensureAbsoluteUrl = (url) => {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  return `https://${url}`;
+};
+
 // This modal fetches its own data based on the ID it receives
 function GameModal({ gameId, apiKey, onClose }) {
   const [gameDetails, setGameDetails] = useState(null);
+  const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -10,20 +19,30 @@ function GameModal({ gameId, apiKey, onClose }) {
   useEffect(() => {
     if (!gameId) return;
 
-    async function fetchGameDetails() {
+   async function fetchAllDetails() {
       setLoading(true);
       setError(null);
-      
+      setStores([]); 
+
       const detailsUrl = `/api/games/${gameId}?key=${apiKey}`;
+      const storesUrl = `/api/games/${gameId}/stores?key=${apiKey}`;
 
       try {
-        const response = await fetch(detailsUrl);
-        if (!response.ok) {
-          throw new Error("Failed to fetch game details.");
-        }
-        
-        const data = await response.json();
-        setGameDetails(data);
+        // Fetch both simultaneously
+        const [detailsRes, storesRes] = await Promise.all([
+          fetch(detailsUrl),
+          fetch(storesUrl)
+        ]);
+
+        if (!detailsRes.ok) throw new Error("Failed to fetch game details.");
+        if (!storesRes.ok) throw new Error("Failed to fetch store links.");
+
+        const detailsData = await detailsRes.json();
+        const storesData = await storesRes.json();
+
+        // Set state for both results
+        setGameDetails(detailsData); // Has game info and store *names*
+        setStores(storesData.results || []); // Has store *URLs* and IDs
         
       } catch (err) {
         console.error("Fetch error:", err);
@@ -33,7 +52,7 @@ function GameModal({ gameId, apiKey, onClose }) {
       }
     }
     
-    fetchGameDetails();
+    fetchAllDetails();
   }, [gameId, apiKey]); // Re-run this fetch if the gameId changes
 
   // This stops a click inside the modal from closing it
@@ -58,6 +77,8 @@ function GameModal({ gameId, apiKey, onClose }) {
     const genresList = gameDetails.genres?.map(g => g.name).join(', ') || 'N/A';
     const platformsList = gameDetails.platforms?.map(p => p.platform.name).join(', ') || 'N/A';
 
+    const storeNameMap = new Map();
+
     return (
       <>
         <h2>{gameDetails.name}</h2>
@@ -76,7 +97,30 @@ function GameModal({ gameId, apiKey, onClose }) {
           <p><strong>Platforms:</strong> {platformsList}</p>
         </div>
 
-        {/* Store buttons will go here in a future push */}
+        {/* Store buttons*/}
+        <div className="modal-stores-container">
+          <h3>Available Stores:</h3>
+          <div className="modal-stores-list">
+            
+            {/* Map over the 'stores' array (from the 2nd API call) */}
+            {stores.length > 0 ? (
+              stores.map(link => (
+                <a 
+                  key={link.id} 
+                  href={ensureAbsoluteUrl(link.url)} // Get URL
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="modal-play-button"
+                >
+                  {/* Get Name from our map */}
+                  {storeNameMap.get(link.store_id) || 'Go to Store'}
+                </a>
+              ))
+            ) : (
+              <p>No store links available for this game.</p>
+            )}
+          </div>
+        </div>
       </>
     );
   };
