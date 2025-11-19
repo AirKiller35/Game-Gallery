@@ -1,29 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import '../App.css'; 
 import GameCard from '../components/GameCard';
+import GameModal from '../components/GameModal'; // Import the new modal
 
-// This is our temporary API key.
-// In a real app, this would be in a .env file, but the proxy handles it for now.
+const GAMES_PER_PAGE = 20;
 const apiKey = '89b79a0a975f4f7585a142edaa0974ea';
 
 export function GalleryPage() {
   // --- State ---
-  // 'games' will hold our array of games from the API
-  // 'loading' will show a message while we fetch
-  // 'error' will show a message if the fetch fails
   const [games, setGames] = useState([]); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // --- NEW STATE for Pagination ---
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+
+  // --- NEW STATE for Modal ---
+  // When this is null, the modal is closed. When it's a game ID, it's open.
+  const [selectedGameId, setSelectedGameId] = useState(null);
 
   // --- Data Fetching ---
-  // This 'useEffect' hook runs once when the component first loads
+  // This 'useEffect' hook now re-runs when 'currentPage' changes
   useEffect(() => {
     async function fetchGames() {
       try {
         setLoading(true);
-        // We use our '/api' proxy from vite.config.js
-        // We fetch 20 games, sorted by popularity
-        const response = await fetch(`/api/games?key=${apiKey}&page_size=20&ordering=-added`); 
+        setError(null);
+
+        // We now add the 'page' parameter to our API call
+        const response = await fetch(
+          `/api/games?key=${apiKey}&page_size=${GAMES_PER_PAGE}&ordering=-added&page=${currentPage}`
+        ); 
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -31,19 +39,37 @@ export function GalleryPage() {
 
         const data = await response.json();
         
-        // The API returns data in an object with a 'results' array
         setGames(data.results); 
-        setError(null);
+        // We get the total 'count' from the API to calculate total pages
+        setTotalPages(Math.ceil(data.count / GAMES_PER_PAGE));
+
       } catch (error) {
         console.error("Could not fetch games:", error);
         setError("Failed to load games. Please try again.");
       } finally {
-        setLoading(false); // Always stop loading, even if we failed
+        setLoading(false);
       }
     }
     
-    fetchGames();
-  }, []);
+    fetchGames(); 
+  }, [currentPage]); // Re-run this effect when 'currentPage' changes
+
+  // --- NEW HANDLERS ---
+  const handleGameClick = (game) => {
+    setSelectedGameId(game.id);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedGameId(null);
+  };
+
+  const goToNextPage = () => {
+    setCurrentPage(page => Math.min(page + 1, totalPages));
+  };
+
+  const goToPrevPage = () => {
+    setCurrentPage(page => Math.max(page - 1, 1));
+  };
 
   // --- Render Logic ---
   const renderContent = () => {
@@ -61,8 +87,8 @@ export function GalleryPage() {
           <GameCard 
             key={game.id} 
             game={game} 
-            // This is a temporary click handler
-            onGameClick={() => console.log('Clicked', game.name)} 
+            // Pass the new click handler to the card
+            onGameClick={handleGameClick} 
           />
         ))}
       </div>
@@ -75,6 +101,38 @@ export function GalleryPage() {
       <main>
         {renderContent()}
       </main>
+
+      {/* --- NEW PAGINATION CONTROLS --- */}
+      {/* Only show pagination if not loading and we have games */}
+      {!loading && !error && games.length > 0 && (
+        <div className="pagination-container">
+          <button 
+            onClick={goToPrevPage} 
+            disabled={currentPage === 1}
+          >
+            Previous
+          </button>
+          <span>
+            Page {currentPage} of {totalPages}
+          </span>
+          <button 
+            onClick={goToNextPage} 
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+        </div>
+      )}
+
+      {/* --- NEW MODAL RENDER --- */}
+      {/* Conditionally render the modal if a game ID is selected */}
+      {selectedGameId && (
+        <GameModal 
+          gameId={selectedGameId} 
+          apiKey={apiKey}
+          onClose={handleCloseModal} 
+        />
+      )}
     </div>
   );
 }
