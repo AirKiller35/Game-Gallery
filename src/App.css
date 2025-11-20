@@ -299,3 +299,178 @@
   border-color: #EAEAEA;
   box-shadow: 0 0 0 3px rgba(234, 234, 234, 0.2);
 }
+/* --- Login Page Styles --- */
+.login-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 90vh;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.login-container {
+  width: 100%;
+  max-width: 400px;
+  padding: 30px;
+  background-color: #202020;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+.login-container .main-title {
+  margin-top: 0;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.login-form input {
+  padding: 12px;
+  font-size: 1rem;
+  background-color: #333;
+  color: #fff;
+  border: 1px solid #555;
+  border-radius: 5px;
+  outline: none;
+}
+
+.login-form input:focus {
+  border-color: #EAEAEA;
+}
+
+.login-button,
+.guest-button {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.login-button {
+  background-color: #EAEAEA;
+  color: #151515;
+}
+.login-button:hover {
+  background-color: #CCCCCC;
+}
+
+.guest-button {
+  background-color: #333;
+  color: #fff;
+}
+.guest-button:hover {
+  background-color: #444;
+}
+
+.toggle-auth-button {
+  background: none;
+  border: none;
+  color: #EAEAEA;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0;
+  margin-top: -10px;
+  margin-bottom: 20px;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: #888;
+  margin: 20px 0;
+}
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #444;
+}
+.divider span {
+  padding: 0 10px;
+}
+
+/* --- Header Styles (for Gallery Page) --- */
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.header-container .main-title {
+  margin: 0;
+}
+
+.auth-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  color: #aaa;
+}
+
+.logout-button {
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  background-color: #333;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.logout-button:hover {
+  background-color: #444;
+}
+/* --- Header Styles --- */
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.header-container .main-title {
+  margin: 0; 
+}
+
+.auth-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  color: #aaa;
+  font-size: 0.95rem;
+}
+
+.logout-button {
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  background-color: #333;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.logout-button:hover {
+  background-color: #444;
+}
+.search-container {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+  gap: 10px;
+}

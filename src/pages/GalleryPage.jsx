@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import '../App.css'; 
 import GameCard from '../components/GameCard';
-import GameModal from '../components/GameModal'; // Now using the real modal
+import GameModal from '../components/GameModal';
+import { useAuth } from '../authContext'; 
 
 const GAMES_PER_PAGE = 20;
 const apiKey = '89b79a0a975f4f7585a142edaa0974ea';
 
 export function GalleryPage() {
+  // --- Auth State ---
+  const { user, logout } = useAuth();
+
   // --- State for Game Data ---
   const [games, setGames] = useState([]); 
   const [loading, setLoading] = useState(true);
@@ -32,13 +36,11 @@ export function GalleryPage() {
   useEffect(() => {
     const fetchFilters = async () => {
       try {
-        // Fetch genres list
         const genreRes = await fetch(`/api/genres?key=${apiKey}`);
         if (!genreRes.ok) throw new Error('Failed to fetch genres');
         const genreData = await genreRes.json();
         setGenres(genreData.results);
 
-        // Fetch platforms list (using 'parents' for a cleaner list)
         const platformRes = await fetch(`/api/platforms/lists/parents?key=${apiKey}`);
         if (!platformRes.ok) throw new Error('Failed to fetch platforms');
         const platformData = await platformRes.json();
@@ -48,18 +50,20 @@ export function GalleryPage() {
       }
     };
     fetchFilters();
-  }, []); // Runs once on mount
+  }, []); 
 
   // --- Effect 2: Fetch Games (The Main Logic) ---
-  // Re-runs whenever any filter/page state changes
   useEffect(() => {
     async function fetchGames() {
       setLoading(true);
       setError(null);
 
-      // Build the API URL dynamically
       let apiUrl = `/api/games?key=${apiKey}&page_size=${GAMES_PER_PAGE}&page=${currentPage}`;
       
+      // 1. Always filter out AO games and Adult tags
+      apiUrl += `&esrb_rating=1,2,3,4`;
+      apiUrl += `&exclude_tags=210,211`;
+
       // 2. Add search term if active
       if (activeSearch) {
         apiUrl += `&search=${activeSearch}`;
@@ -105,17 +109,15 @@ export function GalleryPage() {
   const goToNextPage = () => setCurrentPage(page => page + 1);
   const goToPrevPage = () => setCurrentPage(page => page - 1);
 
-  // Updates the search bar text as you type
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
   
-  // Triggers the search when form is submitted
   const handleSearchSubmit = (event) => {
     event.preventDefault(); 
     setActiveSearch(searchTerm); 
-    setCurrentPage(1); // Reset to page 1
-    setSelectedSort('relevance'); // Auto-switch to relevance sort
+    setCurrentPage(1); 
+    setSelectedSort('relevance'); 
   };
   
   const handleSortChange = (e) => {
@@ -131,12 +133,11 @@ export function GalleryPage() {
     setCurrentPage(1); 
   };
   
-  // Resets everything to default
   const goToHome = () => {
     setSearchTerm('');
     setActiveSearch('');
     setCurrentPage(1);
-    setSelectedSort('-added'); // Default back to Popularity
+    setSelectedSort('-added'); 
     setSelectedGenre('');
     setSelectedPlatform('');
   };
@@ -164,8 +165,17 @@ export function GalleryPage() {
 
   return (
     <div className="App">
-      {/* Header with Home Reset */}
-      <h1 className="main-title" onClick={goToHome}>Game Gallery</h1>
+      {/* --- Header with Auth Controls --- */}
+      <div className="header-container">
+        <h1 className="main-title" onClick={goToHome}>
+          Game Gallery
+        </h1>
+        
+        <div className="auth-info">
+          <span>Welcome, {user.username || user.name}</span>
+          <button onClick={logout} className="logout-button">Logout</button>
+        </div>
+      </div>
 
       {/* Search Bar */}
       <form className="search-container" onSubmit={handleSearchSubmit}>
@@ -181,7 +191,6 @@ export function GalleryPage() {
 
       {/* Filter & Sort Bar */}
       <div className="filter-container">
-        {/* Sort Dropdown */}
         <select 
           className="filter-select" 
           value={selectedSort} 
@@ -196,7 +205,6 @@ export function GalleryPage() {
           <option value="-name">Sort by: Name (Z-A)</option>
         </select>
 
-        {/* Genre Dropdown */}
         <select className="filter-select" value={selectedGenre} onChange={handleGenreChange}>
           <option value="">All Genres</option>
           {genres.map(genre => (
@@ -204,7 +212,6 @@ export function GalleryPage() {
           ))}
         </select>
 
-        {/* Platform Dropdown */}
         <select className="filter-select" value={selectedPlatform} onChange={handlePlatformChange}>
           <option value="">All Platforms</option>
           {platforms.map(platform => (
