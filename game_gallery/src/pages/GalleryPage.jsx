@@ -3,6 +3,7 @@ import '../App.css';
 import GameCard from '../components/GameCard';
 import GameModal from '../components/GameModal';
 import { useAuth } from '../authContext'; 
+import { FavouritesPage } from './FavouritesPage';
 
 const GAMES_PER_PAGE = 20;
 
@@ -155,6 +156,15 @@ export function GalleryPage() {
     );
   };
 
+  if (view === 'favourites') {
+    return (
+      <FavouritesPage 
+        apiKey={apiKey} 
+        onBack={() => setView('gallery')} 
+      />
+    );
+  }
+
   return (
     <div className="App">
       <div className="header-container">
@@ -162,6 +172,9 @@ export function GalleryPage() {
           Game Gallery
         </h1>
         <div className="auth-info">
+          <button onClick={() => setView('favourites')} className="logout-button favs-button">
+            Curated Picks 
+          </button>
           <span>Welcome, {user.username || user.name}</span>
           <button onClick={logout} className="logout-button">Logout</button>
           {!isGuest && (
