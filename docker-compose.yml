@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  # 1. The Backend Server
+  server:
+    build: ./game_gallery_server
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./game_gallery_server:/app
+      - /app/node_modules
+    env_file:
+      - ./.env # Tells it to use our new .env file
+    depends_on:
+      - mongo # Tells it to wait for the database
+
+  # 2. The Frontend Client
+  client:
+    build: ./game_gallery
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./game_gallery:/app
+      - /app/node_modules
+    depends_on:
+      - server # Tells it to wait for the server
+
+  # 3. The MongoDB Database
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017" # So we can see the DB from our computer
+    volumes:
+      - mongo-data:/data/db # This saves your data even if you stop
+
+volumes:
+  mongo-data:
